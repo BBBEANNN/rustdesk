@@ -118,6 +118,7 @@ fn send_plugin_list_event(plugins: &HashMap<String, PluginInfo>) {
         m.insert("name", MSG_TO_UI_TYPE_PLUGIN_MANAGER);
         m.insert(MSG_TO_UI_PLUGIN_MANAGER_LIST, &plugin_list);
         if let Ok(event) = serde_json::to_string(&m) {
+            super::unity::notify_manager_event(&event);
             let _res = flutter::push_global_event(flutter::APP_TYPE_MAIN, event.clone());
         }
     }
@@ -334,6 +335,7 @@ fn push_event(id: &str, r#type: &str, msg: &str) {
     m.insert("id", id);
     m.insert(r#type, msg);
     if let Ok(event) = serde_json::to_string(&m) {
+        super::unity::notify_manager_event(&event);
         let _res = flutter::push_global_event(flutter::APP_TYPE_MAIN, event.clone());
     }
 }

@@ -2318,6 +2318,7 @@ impl<T: InvokeUiSession> Remote<T> {
             discard_queue: discard_queue.clone(),
         };
         let handler = self.handler.ui_handler.clone();
+        let unity_peer_id: Arc<str> = Arc::from(self.handler.get_id());
         crate::client::start_video_thread(
             self.handler.clone(),
             display,
@@ -2326,16 +2327,27 @@ impl<T: InvokeUiSession> Remote<T> {
             decode_fps,
             self.chroma.clone(),
             discard_queue,
-            move |display: usize,
-                  data: &mut scrap::ImageRgb,
-                  _texture: *mut c_void,
-                  pixelbuffer: bool| {
+            {
+                let unity_peer_id = unity_peer_id.clone();
+                move |display: usize,
+                      data: &mut scrap::ImageRgb,
+                      _texture: *mut c_void,
+                      pixelbuffer: bool| {
                 *frame_count.write().unwrap() += 1;
                 if pixelbuffer {
+                    crate::unity::notify_video_frame(
+                        unity_peer_id.as_ref(),
+                        display,
+                        data.w,
+                        data.h,
+                        data.align(),
+                        data.raw.as_slice(),
+                    );
                     handler.on_rgba(display, data);
                 } else {
                     #[cfg(all(feature = "vram", feature = "flutter"))]
                     handler.on_texture(display, _texture);
+                }
                 }
             },
         );

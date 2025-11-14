@@ -618,9 +618,11 @@ fn reload_ui(desc: &Desc, sync_to: Option<&str>) {
                 m.insert("ui", ui);
                 serde_json::to_string(&m).unwrap_or("".to_owned())
             };
+            let event_payload = make_event(&ui);
+            super::unity::notify_reload_event(&event_payload);
             match sync_to {
                 Some(channel) => {
-                    let _res = flutter::push_global_event(channel, make_event(&ui));
+                    let _res = flutter::push_global_event(channel, event_payload);
                 }
                 None => {
                     let v: Vec<&str> = location.split('|').collect();
@@ -629,7 +631,7 @@ fn reload_ui(desc: &Desc, sync_to: Option<&str>) {
                     if v.len() >= 2 {
                         let available_channels = flutter::get_global_event_channels();
                         if available_channels.contains(&v[1]) {
-                            let _res = flutter::push_global_event(v[1], make_event(&ui));
+                            let _res = flutter::push_global_event(v[1], event_payload.clone());
                         }
                     }
                 }

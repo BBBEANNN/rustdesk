@@ -18,6 +18,7 @@ pub mod native;
 pub mod native_handlers;
 mod plog;
 mod plugins;
+mod unity;
 
 pub use manager::{
     install::{change_uninstall_plugin, install_plugin_with_url},
@@ -154,7 +155,7 @@ fn get_uninstall_file_path() -> ResultType<PathBuf> {
 }
 
 #[inline]
-fn cstr_to_string(cstr: *const c_char) -> ResultType<String> {
+pub(super) fn cstr_to_string(cstr: *const c_char) -> ResultType<String> {
     if cstr.is_null() {
         bail!("failed to convert string, the pointer is null");
     }
@@ -164,7 +165,7 @@ fn cstr_to_string(cstr: *const c_char) -> ResultType<String> {
 }
 
 #[inline]
-fn str_to_cstr_ret(s: &str) -> *const c_char {
+pub(super) fn str_to_cstr_ret(s: &str) -> *const c_char {
     let mut s = s.as_bytes().to_vec();
     s.push(0);
     unsafe {
@@ -179,7 +180,7 @@ fn str_to_cstr_ret(s: &str) -> *const c_char {
 }
 
 #[inline]
-fn free_c_ptr(p: *mut c_void) {
+pub(super) fn free_c_ptr(p: *mut c_void) {
     if !p.is_null() {
         unsafe {
             libc::free(p);
