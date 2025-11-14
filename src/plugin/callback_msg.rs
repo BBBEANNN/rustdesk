@@ -369,6 +369,7 @@ fn push_event_to_ui(channel: u16, peer: &str, content: &str) {
     m.insert("peer", &peer);
     m.insert("content", &content);
     let event = serde_json::to_string(&m).unwrap_or("".to_string());
+    super::unity::notify_plugin_event(&event);
     // Send to main and cm
     for (k, v) in MSG_TO_UI_FLUTTER_CHANNELS.iter() {
         if channel & k != 0 {
@@ -396,6 +397,7 @@ fn push_option_to_ui(channel: u16, id: &str, peer: &str, msg: &MsgToConfig, ui: 
     let mut m = HashMap::from(v);
     m.insert("name", MSG_TO_UI_TYPE_PLUGIN_OPTION);
     let event = serde_json::to_string(&m).unwrap_or("".to_string());
+    super::unity::notify_option_event(&event);
     for (k, v) in MSG_TO_UI_FLUTTER_CHANNELS.iter() {
         if channel & k != 0 {
             let _res = flutter::push_global_event(v as _, event.to_string());
